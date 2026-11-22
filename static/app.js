@@ -51,7 +51,7 @@ const RENDERERS = {
       const place = esc(hypo.name || "");
       const mag = hypo.magnitude != null ? "M" + hypo.magnitude : "";
       const scale = eq.maxScale != null ? "最大震度 " + scaleText(eq.maxScale) : "";
-      const tsunami = eq.domesticTsunami ? "（" + esc(eq.domesticTsunami) + "）" : "";
+      const tsunami = eq.domesticTsunami && eq.domesticTsunami !== "None" ? "（" + esc(eq.domesticTsunami) + "）" : "";
       return time + " " + place + " " + mag + " " + scale + tsunami;
     });
   },
@@ -101,7 +101,7 @@ const RENDERERS = {
     return listItems(items, (r) => {
       const name = esc(r.shikonaEn || r.shikonaJp || "");
       const rank = esc(((r.currentRank || "") + " " + (r.currentRankJp || "")).trim());
-      const heya = esc(r.heyaEn || r.heyaJp || "");
+      const heya = esc(r.heya || r.heyaEn || r.heyaJp || "");
       return "<strong>" + name + "</strong> " + rank + "（" + heya + "） 身長 " + esc(r.height || "?") + "cm 体重 " + esc(r.weight || "?") + "kg";
     });
   },

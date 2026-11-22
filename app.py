@@ -11,6 +11,7 @@
 """
 
 import json
+import os
 import time
 import urllib.error
 import urllib.parse
@@ -32,8 +33,8 @@ NASA_API_KEY = "DEMO_KEY"
 def fetch_json(url):
     """指定URLを GET して JSON として返す。失敗時は例外を送出する。
 
-    429 / 500 / 502 / 503 は一時的な制限のことが多いため、最大3回まで
-    3秒待って再試行する。
+    429 / 500 / 502 / 503 や通信タイムアウトは一時的なことが多いため、
+    最大3回まで3秒待って再試行する。
     """
     last_error = None
     for attempt in range(3):
@@ -47,12 +48,23 @@ def fetch_json(url):
                 time.sleep(3)
             else:
                 raise
+        except urllib.error.URLError as exc:
+            last_error = exc
+            if attempt < 2:
+                time.sleep(3)
+            else:
+                raise
     raise last_error
 
 
 def api_openalex(params):
     q = params.get("q", ["artificial intelligence"])[0]
     url = "https://api.openalex.org/works?search=" + urllib.parse.quote(q) + "&per-page=5"
+    # OPENALEX_MAILTO にメールアドレスを設定すると、OpenAlex の polite pool
+    # 扱いになり、429（回数制限）が起きにくくなる。未設定でも動作する。
+    mailto = os.environ.get("OPENALEX_MAILTO", "")
+    if mailto:
+        url += "&mailto=" + urllib.parse.quote(mailto)
     return fetch_json(url)
 
 
