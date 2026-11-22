@@ -11,6 +11,7 @@
 """
 
 import json
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -29,10 +30,24 @@ NASA_API_KEY = "DEMO_KEY"
 
 
 def fetch_json(url):
-    """指定URLを GET して JSON として返す。失敗時は例外を送出する。"""
-    req = urllib.request.Request(url, headers=HEADERS)
-    with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
-        return json.loads(resp.read().decode("utf-8"))
+    """指定URLを GET して JSON として返す。失敗時は例外を送出する。
+
+    429 / 500 / 502 / 503 は一時的な制限のことが多いため、最大3回まで
+    3秒待って再試行する。
+    """
+    last_error = None
+    for attempt in range(3):
+        try:
+            req = urllib.request.Request(url, headers=HEADERS)
+            with urllib.request.urlopen(req, timeout=TIMEOUT) as resp:
+                return json.loads(resp.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            last_error = exc
+            if exc.code in (429, 500, 502, 503) and attempt < 2:
+                time.sleep(3)
+            else:
+                raise
+    raise last_error
 
 
 def api_openalex(params):
@@ -83,7 +98,8 @@ def api_pokeapi(params):
 
 
 def api_sumo(params):
-    url = "https://sumo-api.com/api/rikishi?limit=5&skip=0"
+    # 力士一覧は /api/rikishis（複数形）。/api/rikishi は単体の力士用。
+    url = "https://sumo-api.com/api/rikishis?limit=5&skip=0"
     return fetch_json(url)
 
 
@@ -96,9 +112,9 @@ def api_dog(params):
 
 
 def api_met(params):
-    # まず検索して作品IDを1つ取り、次にその作品情報を取得する。
+    # 検索は v1.1 を使う。v1/search は 2026-10-01 に廃止され 410 を返す。
     search = fetch_json(
-        "https://collectionapi.metmuseum.org/public/collection/v1/search"
+        "https://collectionapi.metmuseum.org/public/collection/v1.1/search"
         "?q=sunflowers&isHighlight=true"
     )
     ids = search.get("objectIDs") or []
@@ -110,11 +126,17 @@ def api_met(params):
         if obj.get("primaryImageSmall"):
             return obj
     if ids:
-        return fetch_json(
+        first = fetch_json(
             "https://collectionapi.metmuseum.org/public/collection/v1/objects/"
             + str(ids[0])
         )
-    return search
+        if first.get("primaryImageSmall"):
+            return first
+    # 画像のある作品が見つからない場合は、画像のある既知の作品を返す。
+    # 436121: ドガ「花瓶のそばに座る女性」（1865年）。
+    return fetch_json(
+        "https://collectionapi.metmuseum.org/public/collection/v1/objects/436121"
+    )
 
 
 def api_trivia(params):

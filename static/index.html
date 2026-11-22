@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>無料APIお試しサイト</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <h1>無料APIお試しサイト</h1>
+  <p>12の無料APIをボタン1つで試せるローカルサイトです。APIの呼び出しはサーバ側（Python標準ライブラリのみ）で行います。</p>
+  <p>
+    <button id="health-btn" type="button">すべてのAPIの接続テスト</button>
+    <span id="health-result"></span>
+  </p>
+  <p class="note">P2P地震情報は実験的な扱いです。NASA APOD は DEMO_KEY で動いています（無料の個人キーへの置き換えを推奨します）。</p>
+</header>
+<main id="cards">
+  <section class="card" data-api="openalex">
+    <h2>OpenAlex 論文検索</h2>
+    <p>論文をキーワードで検索します。</p>
+    <label>キーワード <input type="text" name="q" value="artificial intelligence"></label>
+    <button type="button">論文を検索する</button>
+  </section>
+  <section class="card" data-api="p2pquake">
+    <h2>P2P地震情報（実験的）</h2>
+    <p>最新の地震情報10件を表示します。実験的な扱いです。</p>
+    <button type="button">最新の地震を見る</button>
+  </section>
+  <section class="card" data-api="openmeteo">
+    <h2>Open-Meteo 天気</h2>
+    <p>船橋市と東京都の現在の天気を表示します。</p>
+    <label>都市
+      <select name="city">
+        <option value="funabashi" selected>船橋市</option>
+        <option value="tokyo">東京都</option>
+      </select>
+    </label>
+    <button type="button">天気を見る</button>
+  </section>
+  <section class="card" data-api="openlibrary">
+    <h2>Open Library 本検索</h2>
+    <p>本をキーワードで検索します。</p>
+    <label>キーワード <input type="text" name="q" value="python"></label>
+    <button type="button">本を検索する</button>
+  </section>
+  <section class="card" data-api="apod">
+    <h2>NASA APOD 天文写真</h2>
+    <p>NASAの今日の天文写真を表示します。DEMO_KEYで取得しています。</p>
+    <button type="button">今日の天文写真を見る</button>
+  </section>
+  <section class="card" data-api="pokeapi">
+    <h2>PokéAPI ポケモン</h2>
+    <p>ポケモンの名前または図鑑番号で調べます。</p>
+    <label>名前または番号 <input type="text" name="name" value="pikachu"></label>
+    <button type="button">ポケモンを調べる</button>
+  </section>
+  <section class="card" data-api="sumo">
+    <h2>Sumo API 力士</h2>
+    <p>力士の一覧を表示します。</p>
+    <button type="button">力士を見る</button>
+  </section>
+  <section class="card" data-api="catfact">
+    <h2>Cat Facts 猫の豆知識</h2>
+    <p>猫に関する豆知識をランダムに表示します。</p>
+    <button type="button">猫の豆知識を見る</button>
+  </section>
+  <section class="card" data-api="dog">
+    <h2>Dog API 犬の画像</h2>
+    <p>犬の画像をランダムに表示します。</p>
+    <button type="button">犬の画像を見る</button>
+  </section>
+  <section class="card" data-api="met">
+    <h2>メトロポリタン美術館</h2>
+    <p>「ひまわり」で検索した収蔵作品を表示します（画像のある作品を優先します）。</p>
+    <button type="button">作品を見る</button>
+  </section>
+  <section class="card" data-api="trivia">
+    <h2>Open Trivia クイズ</h2>
+    <p>5問の4択クイズに挑戦できます。選択肢をクリックして回答します。</p>
+    <button type="button">クイズを始める</button>
+  </section>
+  <section class="card" data-api="dicebear">
+    <h2>DiceBear アバター</h2>
+    <p>入力したシード（文字列）からアバター画像を作ります。</p>
+    <label>シード <input type="text" name="seed" value="muse"></label>
+    <button type="button">アバターを作る</button>
+  </section>
+</main>
+<section id="result-area">
+  <h2 id="result-title">結果</h2>
+  <div id="result">ボタンを押すと、ここに結果が表示されます。</div>
+  <details id="raw-json">
+    <summary>生のJSONを見る</summary>
+    <pre id="raw-json-body"></pre>
+  </details>
+</section>
+<script src="/static/app.js"></script>
+</body>
+</html>
